@@ -1,4 +1,5 @@
 const User = require("../models/user.model")
+const jwt = require("jsonwebtoken")
 
 exports.register = async (req, res) => {
 	const { username, email, password } = req.body
@@ -33,12 +34,17 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
 	const { email, password } = req.body
+	const mdbPasswd = process.env.MOVIESDB_PASSWD
 	try {
-		const userExists = await User.findOne({ email, password })
+		let userExists = await User.findOne({ email, password }, { password: 0, __v: 0, updatedAt: 0 })
 		if (userExists) {
-			res.status(200).json({ message: "Login Success" })
-			// TODO: Login logic
-
+			const token = jwt.sign({ token: userExists._id }, mdbPasswd)
+			userdata = { ...userExists.toObject(), _id: null }
+			res.status(200).json({
+				message: "Login Success",
+				userdata,
+				token
+			})
 		} else {
 			res.status(406).json({ message: 'Incorrect email or password' })
 		}
