@@ -29,7 +29,7 @@ exports.register = async (req, res) => {
 			message: error.message
 		})
 	}
-
+	
 }
 
 exports.login = async (req, res) => {
@@ -53,5 +53,29 @@ exports.login = async (req, res) => {
 			error: error.name,
 			message: error.message
 		})
+	}
+}
+
+exports.details = async (req, res) => {
+	const userId = req.payload
+	try {
+		const userDetails = await User.findOne({ _id: userId }, { password: 0, _id: 0 })
+		if (userDetails) {
+			res.status(200).json({
+				message: "Success",
+				userdata: userDetails
+			})
+		} else {
+
+			res.status(406).json({
+				message: "Something went wrong, Try logging in",
+			})
+		}
+	} catch (error) {
+		res.status(401).json({
+			error: error.name,
+			message: error.message
+		})
+
 	}
 }
