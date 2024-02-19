@@ -1,7 +1,8 @@
 const express = require("express")
 const cors = require("cors")
 const mongoose = require("mongoose")
-const userRoutes = require("./routes/user.route")
+const userRouter = require("./routes/user.route")
+const mdbRouter = require("./routes/mdb.route")
 
 require("dotenv").config()
 
@@ -11,7 +12,8 @@ const connString = process.env.MOVIESDB_URI
 
 app.use(cors())
 app.use(express.json())
-app.use("/user",userRoutes)
+app.use("/user", userRouter)
+app.use("/mdb", mdbRouter)
 
 app.get('/', (req, res) => {
 	res.send(`<h1 style="text-align:center;margin-top:45vh">MDB running successfully and ready to accept client request</h1>`)
