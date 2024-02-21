@@ -1,11 +1,11 @@
 const express = require("express")
-const UserController = require("../controllers/user.controller")
+const {details,login,register} = require("../controllers/user.controller")
 const jwtMiddleware = require("../middlewares/jwt.middleware")
 
 const userRouter = express.Router()
 
-userRouter.post("/register", UserController.register)
-userRouter.post("/login", UserController.login)
-userRouter.post("/details", jwtMiddleware, UserController.details)
+userRouter.post("/register", register)
+userRouter.post("/login", login)
+userRouter.post("/details", jwtMiddleware, details)
 
 module.exports = userRouter
