@@ -1,8 +1,9 @@
 const MDB = require("../models/mdb.model")
+const { getContentTypeIdentifier } = require("./mdbUtils")
 
 exports.like = async (req, res) => {
 	const { tmdbId } = req.params
-	const type = req.params.type == "movie" ? 1 : 2
+	const type = getContentTypeIdentifier(req.params.type)
 	const { liked } = req.body
 	const userId = req.payload
 
@@ -28,7 +29,7 @@ exports.like = async (req, res) => {
 
 exports.save = async (req, res) => {
 	const { tmdbId } = req.params
-	const type = req.params.type == "movie" ? 1 : 2
+	const type = getContentTypeIdentifier(req.params.type)
 	const { saved } = req.body
 	const userId = req.payload
 
@@ -54,7 +55,7 @@ exports.save = async (req, res) => {
 
 exports.getStats = async (req, res) => {
 	const { tmdbId } = req.params
-	const type = req.params.type == "movie" ? 1 : 2
+	const type = getContentTypeIdentifier(req.params.type)
 	const userId = req.payload
 
 	try {
