@@ -15,7 +15,7 @@ const MDB = mongoose.Schema({
 		}
 	},
 	userId: {
-		type: String,
+		type: mongoose.Types.ObjectId,
 		required: true
 	}
 	, liked: {

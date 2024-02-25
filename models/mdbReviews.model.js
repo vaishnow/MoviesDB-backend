@@ -21,7 +21,7 @@ const mdbReview = new mongoose.Schema({
 		}
 	},
 	userId: {
-		type: String,
+		type: mongoose.Types.ObjectId,
 		required: true
 	},
 	rating: mongoose.Schema({
