@@ -3,6 +3,7 @@ const cors = require("cors")
 const mongoose = require("mongoose")
 const userRouter = require("./routes/user.route")
 const mdbRouter = require("./routes/mdb.route")
+const mdbReviewsRouter = require("./routes/mdbReviews.route")
 
 require("dotenv").config()
 
@@ -14,6 +15,7 @@ app.use(cors())
 app.use(express.json())
 app.use("/user", userRouter)
 app.use("/mdb", mdbRouter)
+app.use("/mdb", mdbReviewsRouter)
 
 app.get('/', (req, res) => {
 	res.send(`<h1 style="text-align:center;margin-top:45vh">MDB running successfully and ready to accept client request</h1>`)
