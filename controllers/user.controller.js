@@ -1,4 +1,6 @@
+const mongoose = require("mongoose")
 const User = require("../models/user.model")
+const MDB = require("../models/mdb.model")
 const jwt = require("jsonwebtoken")
 
 exports.register = async (req, res) => {
@@ -29,7 +31,7 @@ exports.register = async (req, res) => {
 			message: error.message
 		})
 	}
-	
+
 }
 
 exports.login = async (req, res) => {
@@ -69,6 +71,60 @@ exports.details = async (req, res) => {
 
 			res.status(406).json({
 				message: "Something went wrong, Try logging in",
+			})
+		}
+	} catch (error) {
+		res.status(401).json({
+			error: error.name,
+			message: error.message
+		})
+
+	}
+}
+
+exports.lists = async (req, res) => {
+	const userId = req.payload
+	const { type } = req.params
+
+	const query = { userId: new mongoose.Types.ObjectId(userId) }
+	query[type] = true
+
+	try {
+		const result = await MDB.aggregate([
+			{
+				$match: query,
+			},
+			{
+				$lookup: {
+					from: "tmdbcaches",
+					localField: "tmdbId",
+					foreignField: "tmdbId",
+					as: "list",
+				},
+			},
+			{
+				$project: {
+					_id: 0,
+					viewedAt: 0,
+					__v: 0
+				}
+			},
+			{
+				$unwind: '$list'
+			}
+		])
+
+		const list = result.filter(stat => stat.list[type] === true)
+
+		if (result) {
+			res.status(200).json({
+				message: "Success",
+				list: result
+			})
+		} else {
+
+			res.status(406).json({
+				message: "Something went wrong",
 			})
 		}
 	} catch (error) {
