@@ -1,4 +1,5 @@
 const MDB = require("../models/mdb.model")
+const tmdbcache = require("../models/tmdbcache.model")
 const { getContentTypeIdentifier } = require("./mdbUtils")
 
 exports.like = async (req, res) => {
@@ -56,6 +57,7 @@ exports.save = async (req, res) => {
 exports.getStats = async (req, res) => {
 	const { tmdbId } = req.params
 	const type = getContentTypeIdentifier(req.params.type)
+	const { poster_path, title, genres } = req.body
 	const userId = req.payload
 
 	try {
@@ -64,6 +66,7 @@ exports.getStats = async (req, res) => {
 		}
 
 		const result = await MDB.findOneAndUpdate({ type, userId, tmdbId }, { viewedAt: new Date().toISOString() }, { upsert: true, new: true, projection: { _id: 0, userId: 0, __v: 0 } })
+		await tmdbcache.findOneAndUpdate({ type, tmdbId }, { poster_path, title, genres }, { upsert: true })
 		if (result) {
 			res.status(200).json({
 				message: "Success",
@@ -74,6 +77,10 @@ exports.getStats = async (req, res) => {
 			res.status(406).json({ message: "Something went wrong" });
 		}
 	} catch (error) {
-		res.status(401).json({ error });
+		res.status(401).json({
+			error: error.name,
+			message: error.message
+		});
+
 	}
 }

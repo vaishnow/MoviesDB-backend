@@ -6,6 +6,6 @@ const mdbRouter = express.Router()
 
 mdbRouter.post("/:type/:tmdbId/like", jwtMiddleware, like)
 mdbRouter.post("/:type/:tmdbId/save", jwtMiddleware, save)
-mdbRouter.get("/:type/:tmdbId", jwtMiddleware, getStats)
+mdbRouter.post("/:type/:tmdbId", jwtMiddleware, getStats)
 
 module.exports = mdbRouter
