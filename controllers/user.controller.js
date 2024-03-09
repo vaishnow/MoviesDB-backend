@@ -82,6 +82,38 @@ exports.details = async (req, res) => {
 	}
 }
 
+exports.edit = async (req, res) => {
+	const userId = new mongoose.Types.ObjectId(req.payload)
+	console.log("req.body = " , req.body); //DEBUG/Exposure
+	const { username } = req.body
+	const { password, newpassword } = req.body
+	try {
+		const usernameExists = await User.findOne({ username, _id: { $ne: userId } })
+		if (usernameExists) {
+			res.status(409).json({
+				error: "Username already exists",
+				message: "The username provided is already registered. Please use a different name."
+			})
+		} else {
+			const userDetails = await User.findOneAndUpdate({ _id: userId, password }, { username, password: newpassword }, { projection: { password: 0 } })
+			if (userDetails) {
+				res.status(200).json({
+					message: "Profile Updated",
+					userdata: userDetails
+				})
+			} else {
+				res.status(401).json({ error: "Incorrect password" })
+			}
+		}
+	} catch (error) {
+		res.status(401).json({
+			error: error.name,
+			message: error.message
+		})
+
+	}
+}
+
 exports.lists = async (req, res) => {
 	const userId = req.payload
 	const { type } = req.params
