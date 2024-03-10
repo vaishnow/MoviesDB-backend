@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
 })
 
 app.get('*', (req, res) => {
-	res.status(400).send(`<h1 style="text-align:center;margin-top:45vh">404 Not Found</h1>`)
+	res.status(404).send(`<h1 style="text-align:center;margin-top:45vh">404 Not Found</h1>`)
 })
 
 mongoose.connect(connString)
