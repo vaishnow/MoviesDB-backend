@@ -16,6 +16,7 @@ app.use(express.json())
 app.use("/user", userRouter)
 app.use("/mdb", mdbRouter)
 app.use("/mdb", mdbReviewsRouter)
+app.use('/images', express.static('./uploads'));
 
 app.get('/', (req, res) => {
 	res.send(`<h1 style="text-align:center;margin-top:45vh">MDB running successfully and ready to accept client request</h1>`)

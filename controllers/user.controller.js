@@ -1,7 +1,13 @@
 const mongoose = require("mongoose")
+const jwt = require("jsonwebtoken")
+const url = require("url");
 const User = require("../models/user.model")
 const MDB = require("../models/mdb.model")
-const jwt = require("jsonwebtoken")
+
+const getUserImgURL = (userdata, req) => userdata?.userimg ? url.format({
+	protocol: req.protocol,
+	host: req.get('host')
+}) + "/images/profile/" + userdata?.userimg : null
 
 exports.register = async (req, res) => {
 	const { username, email, password } = req.body
@@ -39,12 +45,13 @@ exports.login = async (req, res) => {
 	const mdbPasswd = process.env.MOVIESDB_PASSWD
 	try {
 		let userExists = await User.findOne({ email, password }, { password: 0, __v: 0, updatedAt: 0 })
+		const userimgurl = getUserImgURL(userExists, req)
 		if (userExists) {
 			const token = jwt.sign({ token: userExists._id }, mdbPasswd)
 			userdata = { ...userExists.toObject(), _id: null }
 			res.status(200).json({
 				message: "Login Success",
-				userdata,
+				userdata: { userimgurl, ...userdata },
 				token
 			})
 		} else {
@@ -62,10 +69,11 @@ exports.details = async (req, res) => {
 	const userId = req.payload
 	try {
 		const userDetails = await User.findOne({ _id: userId }, { password: 0, _id: 0 })
+		const userimgurl = getUserImgURL(userDetails, req)
 		if (userDetails) {
 			res.status(200).json({
 				message: "Success",
-				userdata: userDetails
+				userdata: { userimgurl, ...userDetails.toObject() }
 			})
 		} else {
 
@@ -84,9 +92,11 @@ exports.details = async (req, res) => {
 
 exports.edit = async (req, res) => {
 	const userId = new mongoose.Types.ObjectId(req.payload)
-	console.log("req.body = " , req.body); //DEBUG/Exposure
 	const { username } = req.body
-	const { password, newpassword } = req.body
+	const { password } = req.body
+	const newpassword = req.body?.newpassword ? req.body.newpassword : password
+	const userimg = req.file?.filename
+
 	try {
 		const usernameExists = await User.findOne({ username, _id: { $ne: userId } })
 		if (usernameExists) {
@@ -95,11 +105,12 @@ exports.edit = async (req, res) => {
 				message: "The username provided is already registered. Please use a different name."
 			})
 		} else {
-			const userDetails = await User.findOneAndUpdate({ _id: userId, password }, { username, password: newpassword }, { projection: { password: 0 } })
+			const userDetails = await User.findOneAndUpdate({ _id: userId, password }, { username, password: newpassword, userimg }, { projection: { password: 0 } })
+			const userimgurl = getUserImgURL(userDetails, req)
 			if (userDetails) {
 				res.status(200).json({
 					message: "Profile Updated",
-					userdata: userDetails
+					userdata: { userimgurl, ...userDetails.toObject() }
 				})
 			} else {
 				res.status(401).json({ error: "Incorrect password" })
@@ -110,7 +121,6 @@ exports.edit = async (req, res) => {
 			error: error.name,
 			message: error.message
 		})
-
 	}
 }
 
@@ -145,8 +155,6 @@ exports.lists = async (req, res) => {
 				$unwind: '$list'
 			}
 		])
-
-		const list = result.filter(stat => stat.list[type] === true)
 
 		if (result) {
 			res.status(200).json({
