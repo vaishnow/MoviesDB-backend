@@ -85,3 +85,31 @@ exports.setReview = async (req, res) => {
 		});
 	}
 }
+
+exports.delReview = async (req, res) => {
+	const userId = req.payload
+	const { tmdbId } = req.params
+	const type = getContentTypeIdentifier(req.params.type)
+
+	try {
+		if (!tmdbId || !type || !userId) {
+			res.status(400).json({ message: "Bad Request" })
+		}
+
+		const result = await mdbReview.findOneAndDelete({ type, tmdbId, userId })
+		if (result) {
+			res.status(200).json({
+				message: "Review removed",
+				result: req.body
+			});
+		}
+		else {
+			res.status(406).json({ message: "Something went wrong" });
+		}
+	} catch (error) {
+		res.status(401).json({
+			error: error.name,
+			message: error.message
+		});
+	}
+}
